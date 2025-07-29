@@ -35,15 +35,12 @@
             text-align: center;
             max-width: 400px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: slideIn 0.8s ease-out;
         }
 
-        .gate-logo {
-            margin-bottom: 20px;
-        }
-
-        .gate-logo img {
-            max-width: 200px;
-            height: auto;
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-50px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .gate-logo-text {
@@ -68,11 +65,25 @@
             font-size: 16px;
             text-align: center;
             box-sizing: border-box;
+            transition: all 0.3s ease;
         }
 
         .password-input:focus {
             outline: none;
             border-color: #1f4060;
+            box-shadow: 0 0 10px rgba(31, 64, 96, 0.3);
+        }
+
+        .password-input.error {
+            border-color: #e74c3c;
+            background-color: #fadbd8;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
         }
 
         .unlock-button {
@@ -85,11 +96,18 @@
             font-weight: bold;
             cursor: pointer;
             width: 100%;
-            transition: transform 0.3s ease;
+            transition: all 0.3s ease;
         }
 
         .unlock-button:hover {
             transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(231, 76, 60, 0.4);
+        }
+
+        .unlock-button:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
         }
 
         .hint {
@@ -99,6 +117,20 @@
             font-style: italic;
         }
 
+        .error-message {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: 10px;
+            font-weight: bold;
+            display: none;
+        }
+
+        .attempts-counter {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+
         /* Hide content until unlocked */
         .protected-content {
             display: none;
@@ -106,6 +138,12 @@
 
         .protected-content.unlocked {
             display: block;
+            animation: fadeIn 1s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
         
         .page {
@@ -117,6 +155,7 @@
             box-shadow: 0 20px 40px rgba(0,0,0,0.2);
             page-break-after: always;
             border-radius: 10px;
+            transition: all 0.5s ease;
         }
         
         .header {
@@ -133,12 +172,6 @@
             margin-bottom: 5px;
             font-style: italic;
             letter-spacing: 1px;
-        }
-
-        .logo img {
-            max-width: 300px;
-            height: auto;
-            margin-bottom: 10px;
         }
         
         .logo .preserve {
@@ -179,6 +212,7 @@
             margin: 30px 0 20px;
             border-radius: 8px;
             text-align: center;
+            box-shadow: 0 5px 15px rgba(31, 64, 96, 0.3);
         }
         
         .reality-check {
@@ -188,6 +222,7 @@
             border: 3px solid #1f4060;
             margin: 30px 0;
             text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
         }
         
         .reality-check h2 {
@@ -195,76 +230,352 @@
             margin-top: 0;
             font-size: 24px;
         }
-        
-        .question {
-            background: #f2f4f8;
+
+        /* PROGRESS BAR STYLES */
+        .progress-container {
+            background: #f0f0f0;
+            border-radius: 25px;
+            padding: 3px;
+            margin: 20px 0;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .progress-bar {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            height: 20px;
+            border-radius: 20px;
+            transition: width 0.8s ease-in-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .progress-text {
+            text-align: center;
+            margin-top: 10px;
+            font-weight: bold;
+            color: #1f4060;
+        }
+
+        /* DYNAMIC QUESTION STYLES */
+        .question-container {
+            max-width: 800px;
+            margin: 0 auto;
             padding: 20px;
-            margin: 15px 0;
-            border-radius: 8px;
-            border-left: 5px solid #1f4060;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .question {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 30px;
+            margin: 20px 0;
+            border-radius: 15px;
+            border: 3px solid #1f4060;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            opacity: 1;
+            transform: translateY(0);
+            transition: all 0.5s ease-in-out;
+        }
+
+        .question.answered {
+            border-color: #27ae60;
+            background: linear-gradient(135deg, #d5f4e6, #a8e6cf);
+            transform: scale(1.02);
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .question-number {
+            background: linear-gradient(135deg, #1f4060, #0f2030);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+            box-shadow: 0 4px 12px rgba(31, 64, 96, 0.3);
+        }
+
+        .section-info {
+            font-size: 14px;
+            color: #7f8c8d;
+            font-weight: bold;
+            background: rgba(255,255,255,0.8);
+            padding: 5px 10px;
+            border-radius: 15px;
         }
         
         .question-text {
             font-weight: bold;
-            margin-bottom: 15px;
-            font-size: 16px;
+            margin-bottom: 25px;
+            font-size: 18px;
             color: #1f4060;
+            text-align: center;
         }
         
         .options {
-            margin-left: 20px;
+            display: grid;
+            gap: 15px;
         }
         
         .option {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+            cursor: pointer;
+            transition: all 0.3s ease;
             display: flex;
             align-items: center;
-            margin: 10px 0;
-            font-size: 14px;
-            padding: 8px 0;
+            font-size: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .option:hover {
+            border-color: #1f4060;
+            background: #f8f9fa;
+            transform: translateX(5px);
+            box-shadow: 0 4px 15px rgba(31, 64, 96, 0.2);
+        }
+
+        .option.selected {
+            border-color: #27ae60;
+            background: linear-gradient(135deg, #d5f4e6, #a8e6cf);
+            transform: scale(1.02);
+            box-shadow: 0 6px 20px rgba(39, 174, 96, 0.3);
         }
         
         .option input[type="radio"] {
-            margin-right: 12px;
-            transform: scale(1.3);
+            margin-right: 15px;
+            transform: scale(1.5);
             accent-color: #1f4060;
         }
         
         .points {
             color: #e74c3c;
             font-weight: bold;
-            margin-left: 10px;
+            margin-left: auto;
+            background: #fff;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 14px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         }
-        
-        .score-box {
+
+        /* SCORE DISPLAY STYLES */
+        .score-dashboard {
             background: linear-gradient(135deg, #1f4060, #0f2030);
             color: white;
-            padding: 15px 25px;
-            border-radius: 8px;
-            font-weight: bold;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 30px 0;
             text-align: center;
-            margin: 25px 0;
-            font-size: 18px;
+            box-shadow: 0 15px 40px rgba(31, 64, 96, 0.4);
+            display: none;
         }
-        
+
+        .score-dashboard.show {
+            display: block;
+            animation: scoreReveal 1s ease-out;
+        }
+
+        @keyframes scoreReveal {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .score-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .score-item {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease;
+        }
+
+        .score-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .score-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #2ecc71;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            display: block;
+            margin: 10px 0;
+            transition: all 0.3s ease;
+        }
+
+        .score-label {
+            font-size: 14px;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
         .total-score {
             background: linear-gradient(135deg, #e74c3c, #c0392b);
             color: white;
-            padding: 25px;
-            border-radius: 12px;
+            padding: 30px;
+            border-radius: 15px;
             text-align: center;
-            font-size: 26px;
+            font-size: 28px;
             font-weight: bold;
             margin: 30px 0;
-            box-shadow: 0 10px 30px rgba(231, 76, 60, 0.3);
+            box-shadow: 0 15px 40px rgba(231, 76, 60, 0.4);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* NAVIGATION BUTTONS */
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin: 30px 0;
+            gap: 20px;
+        }
+
+        .button {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            flex: 1;
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
         }
         
+        .button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(231, 76, 60, 0.4);
+        }
+        
+        .button.primary {
+            background: linear-gradient(135deg, #1f4060, #0f2030);
+            box-shadow: 0 4px 12px rgba(31, 64, 96, 0.3);
+        }
+        
+        .button.primary:hover {
+            box-shadow: 0 8px 25px rgba(31, 64, 96, 0.4);
+        }
+
+        .button:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* BOTONES DE CONSULTATION ESPECIALES CON GLOW */
+        .consultation-glow {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+            padding: 20px 40px;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            animation: glowPulse 3s ease-in-out infinite;
+            box-shadow: 0 8px 25px rgba(243, 156, 18, 0.4), 
+                        0 0 20px rgba(243, 156, 18, 0.3);
+        }
+
+        .consultation-glow::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+            transform: rotate(45deg);
+            animation: shimmerGlow 4s linear infinite;
+        }
+
+        @keyframes glowPulse {
+            0%, 100% { 
+                box-shadow: 0 8px 25px rgba(243, 156, 18, 0.4), 
+                           0 0 20px rgba(243, 156, 18, 0.3);
+                transform: scale(1);
+            }
+            50% { 
+                box-shadow: 0 12px 35px rgba(243, 156, 18, 0.6), 
+                           0 0 30px rgba(243, 156, 18, 0.5);
+                transform: scale(1.05);
+            }
+        }
+
+        @keyframes shimmerGlow {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        .consultation-glow:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 15px 45px rgba(243, 156, 18, 0.7), 
+                        0 0 40px rgba(243, 156, 18, 0.6);
+            background: linear-gradient(135deg, #e67e22, #d35400);
+        }
+
+        /* RESULTS STYLES */
         .results {
             padding: 25px;
             border-radius: 12px;
             margin: 25px 0;
             display: none;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            transition: all 0.8s ease-out;
+        }
+
+        .results.show {
+            display: block;
         }
         
         .results.green {
@@ -286,43 +597,95 @@
             background: linear-gradient(135deg, #fadbd8, #f1948a);
             border: 3px solid #e74c3c;
         }
-        
-        .action-item {
-            background: white;
-            padding: 20px;
+
+        /* CTA Section Mejorada */
+        .cta-section {
+            background: linear-gradient(135deg, #1f4060, #0f2030);
+            color: white;
+            padding: 40px;
+            border-radius: 12px;
+            text-align: center;
+            margin: 30px 0;
+            box-shadow: 0 10px 30px rgba(31, 64, 96, 0.3);
+        }
+
+        /* Contenedor de botones mejorado */
+        .cta-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin: 30px 0 0 0;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .email-button {
+            background: linear-gradient(135deg, #27ae60, #229954);
+            color: white;
+            padding: 18px 35px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            box-shadow: 0 6px 20px rgba(39, 174, 96, 0.3);
+            border: 2px solid transparent;
+        }
+
+        .email-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(39, 174, 96, 0.4);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .consultation-button {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+            padding: 20px 40px;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(243, 156, 18, 0.4);
+            border: 3px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .consultation-button:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 35px rgba(243, 156, 18, 0.5);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Separador visual */
+        .button-separator {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
             margin: 15px 0;
-            border-radius: 8px;
-            border-left: 5px solid #1f4060;
-            box-shadow: 0 3px 15px rgba(0,0,0,0.1);
         }
-        
-        .checklist {
-            list-style: none;
-            padding: 0;
-        }
-        
-        .checklist li {
-            padding: 10px 0;
-            position: relative;
-            padding-left: 35px;
-            font-size: 15px;
-        }
-        
-        .checklist input[type="checkbox"] {
-            position: absolute;
-            left: 0;
-            top: 14px;
-            transform: scale(1.3);
-            accent-color: #1f4060;
-        }
-        
+
         .savings-table {
             width: 100%;
             border-collapse: collapse;
             margin: 25px 0;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
             border-radius: 8px;
             overflow: hidden;
+            animation: tableSlideIn 1s ease-out;
+        }
+
+        @keyframes tableSlideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
         .savings-table th,
@@ -348,42 +711,25 @@
         .savings-table tr:nth-child(even) {
             background: #f2f4f8;
         }
-        
-        .button {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
-            color: white;
-            padding: 15px 30px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            margin: 10px 5px;
+
+        .savings-table tr:hover {
+            background: #e8f4f8;
+            transform: scale(1.01);
             transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-            text-align: center;
         }
-        
-        .button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(231, 76, 60, 0.4);
-        }
-        
-        .button.primary {
-            background: linear-gradient(135deg, #1f4060, #0f2030);
-        }
-        
-        .button.primary:hover {
-            box-shadow: 0 8px 25px rgba(31, 64, 96, 0.4);
-        }
-        
+
         .calculator {
             background: linear-gradient(135deg, #f2f4f8, #e8ecf0);
             padding: 25px;
             border-radius: 12px;
             border: 3px solid #1f4060;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            animation: calculatorSlideIn 1s ease-out;
+        }
+
+        @keyframes calculatorSlideIn {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
         }
         
         .calc-row {
@@ -394,7 +740,13 @@
             padding: 12px;
             background: white;
             border-radius: 6px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+        }
+
+        .calc-row:hover {
+            transform: translateX(5px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.12);
         }
         
         .calc-input {
@@ -405,58 +757,347 @@
             text-align: right;
             font-size: 16px;
             font-weight: bold;
+            transition: all 0.3s ease;
         }
         
         .calc-input:focus {
             outline: none;
             border-color: #1f4060;
+            box-shadow: 0 0 10px rgba(31, 64, 96, 0.3);
         }
         
         .calc-result {
             font-weight: bold;
             color: #27ae60;
             font-size: 20px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Botones de calculadora mejorados */
+        .calculator-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .calc-button {
+            padding: 18px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        }
+
+        .calc-button.email {
+            background: linear-gradient(135deg, #1f4060, #0f2030);
+            color: white;
+        }
+
+        .calc-button.email:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(31, 64, 96, 0.4);
+        }
+
+        .calc-button.consultation {
+            background: linear-gradient(135deg, #27ae60, #229954);
+            color: white;
+        }
+
+        .calc-button.consultation:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(39, 174, 96, 0.4);
+        }
+
+        /* Expert help section */
+        .expert-help-section {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 10px;
+            border: 2px solid #1f4060;
+            box-shadow: 0 5px 15px rgba(31, 64, 96, 0.2);
+        }
+
+        .expert-help-section p {
+            font-size: 16px;
+            color: #2c3e50;
+            margin: 0;
+            font-weight: 500;
         }
         
+        /* ESTILOS MEJORADOS PARA WARNING-BOX Y SUCCESS-BOX */
         .warning-box {
             background: linear-gradient(135deg, #fadbd8, #f1948a);
-            padding: 20px;
-            border-radius: 10px;
+            padding: 25px;
+            border-radius: 12px;
             margin: 20px 0;
             border: 3px solid #e74c3c;
+            box-shadow: 0 8px 25px rgba(231, 76, 60, 0.3);
+        }
+
+        .warning-box h3 {
+            color: #c0392b !important;
+            margin-top: 0;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .warning-box h4 {
+            color: #e74c3c !important;
+            margin: 0 0 10px 0;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .warning-box p {
+            color: #2c3e50 !important;
+            font-size: 16px;
+            margin: 10px 0;
+            font-weight: 500;
+        }
+
+        .warning-box .cost-display {
+            font-size: 24px !important;
+            font-weight: bold !important;
+            color: #c0392b !important;
+            margin: 0;
         }
         
         .success-box {
             background: linear-gradient(135deg, #d5f4e6, #a8e6cf);
-            padding: 20px;
-            border-radius: 10px;
+            padding: 25px;
+            border-radius: 12px;
             margin: 20px 0;
             border: 3px solid #27ae60;
+            box-shadow: 0 8px 25px rgba(39, 174, 96, 0.3);
+            animation: fadeInScale 0.8s ease-out;
         }
-        
-        .cta-section {
-            background: linear-gradient(135deg, #1f4060, #0f2030);
-            color: white;
-            padding: 30px;
-            border-radius: 12px;
-            text-align: center;
-            margin: 30px 0;
+
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
         }
-        
-        .cta-section h3 {
-            font-size: 24px;
-            margin-bottom: 15px;
-        }
-        
-        .section-title {
-            color: #1f4060;
-            border-bottom: 3px solid #1f4060;
-            padding-bottom: 10px;
-            margin: 30px 0 20px;
+
+        .success-box h3 {
+            color: #27ae60 !important;
+            margin-top: 0;
             font-size: 20px;
             font-weight: bold;
         }
+
+        .success-box h4 {
+            color: #1f4060 !important;
+            margin: 0 0 10px 0;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .success-box p {
+            color: #2c3e50 !important;
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .success-box strong {
+            color: #1f4060 !important;
+            font-weight: bold;
+        }
+
+        .action-item {
+            background: white;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border-left: 5px solid #1f4060;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .action-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
         
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .checklist li {
+            padding: 10px 0;
+            position: relative;
+            padding-left: 35px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            color: #2c3e50;
+        }
+
+        .checklist li:hover {
+            background: rgba(31, 64, 96, 0.05);
+            border-radius: 5px;
+            padding-left: 40px;
+        }
+        
+        .checklist input[type="checkbox"] {
+            position: absolute;
+            left: 0;
+            top: 14px;
+            transform: scale(1.3);
+            accent-color: #1f4060;
+        }
+
+        /* ESTILOS DINÁMICOS PARA LA PÁGINA DE CONCLUSIÓN */
+        .dynamic-conclusion {
+            animation: slideInUp 1s ease-out;
+        }
+
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .floating-elements {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .floating-elements::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(31, 64, 96, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: float 20s linear infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateX(-50px) translateY(-50px); }
+            100% { transform: translateX(50px) translateY(50px); }
+        }
+
+        .dynamic-grid {
+            animation: fadeInStagger 1.5s ease-out;
+        }
+
+        @keyframes fadeInStagger {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .final-cta {
+            animation: bounceIn 1.2s ease-out;
+            position: relative;
+            z-index: 10;
+        }
+
+        @keyframes bounceIn {
+            0% { opacity: 0; transform: scale(0.3); }
+            50% { opacity: 1; transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); }
+        }
+
+        /* RESPONSIVE DESIGN */
+        @media (max-width: 768px) {
+            .page {
+                padding: 20px;
+                margin: 0 auto 20px;
+            }
+
+            .score-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-buttons {
+                flex-direction: column;
+            }
+
+            .question {
+                padding: 20px;
+            }
+
+            .question-text {
+                font-size: 16px;
+            }
+
+            .calc-row {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+
+            .calc-input {
+                width: 100%;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .calculator-buttons {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            /* Responsive para warning-box */
+            .warning-box > div[style*="display: flex"] {
+                flex-direction: column !important;
+                gap: 15px;
+            }
+
+            .warning-box > div[style*="display: flex"] > div {
+                flex: none !important;
+            }
+
+            /* Responsive para grids en páginas 6 y 7 */
+            div[style*="grid-template-columns: 1fr 1fr"] {
+                grid-template-columns: 1fr !important;
+                gap: 20px;
+            }
+
+            div[style*="grid-template-columns: 1fr 1fr 1fr 1fr"] {
+                grid-template-columns: 1fr !important;
+                gap: 15px;
+            }
+
+            div[style*="grid-template-columns: 1fr 1fr 1fr"] {
+                grid-template-columns: 1fr !important;
+                gap: 20px;
+            }
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #27ae60;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            z-index: 10000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            animation: slideInRight 0.5s ease-out;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
         @media print {
             body { background: white; }
             .page { box-shadow: none; margin: 0; }
@@ -471,16 +1112,21 @@
     <div class="password-gate" id="passwordGate">
         <div class="gate-box">
             <div class="gate-logo">
-                <!-- Replace this src with your actual logo URL -->
-                <img src="https://via.placeholder.com/200x100/1f4060/ffffff?text=PRESERVE+WEALTH+GROUP" alt="Preserve Wealth Group" style="display: none;" id="gateLogo">
-                <!-- Fallback text logo (remove this once you add your logo) -->
                 <div class="gate-logo-text">🔐 PRESERVE WEALTH GROUP®</div>
             </div>
             <h2 class="gate-title">Access Your Toolkit</h2>
             <p>Enter the password from your email:</p>
             
             <input type="password" id="passwordInput" class="password-input" placeholder="Enter password">
-            <button onclick="checkPassword()" class="unlock-button">🎯 UNLOCK TOOLKIT</button>
+            <button onclick="checkPassword()" class="unlock-button" id="unlockButton">🎯 UNLOCK TOOLKIT</button>
+            
+            <div id="errorMessage" class="error-message">
+                Incorrect password. Please check your email for the correct password.
+            </div>
+            
+            <div id="attemptsCounter" class="attempts-counter">
+                Attempts remaining: <span id="remainingAttempts">5</span>
+            </div>
             
             <p class="hint">Password was provided in your welcome email</p>
         </div>
@@ -492,10 +1138,7 @@
         <div class="page">
             <div class="header">
                 <div class="logo">
-                    <!-- Replace this src with your actual logo URL -->
-                    <img src="https://via.placeholder.com/300x150/1f4060/ffffff?text=PRESERVE+WEALTH+GROUP" alt="Preserve Wealth Group" style="display: none;" id="mainLogo">
-                    <!-- Fallback text logo (remove this once you add your logo) -->
-                    <div style="display: block;" id="textLogo">
+                    <div>
                         <span class="preserve">PRESERVE</span><br>
                         <span class="wealth">WEALTH GROUP</span>
                         <span style="font-size: 16px;">®</span>
@@ -504,7 +1147,7 @@
                 <div class="title">The CPA Evaluation Toolkit</div>
                 <div class="subtitle">Are You Getting Strategic Value or Just Compliance Services?</div>
                 <div class="subtitle">The 5-Minute Assessment That Could Save You $50,000+ Annually</div>
-                <div class="tagline">Keep More of Your Wealth, Pay Less in Taxes—Legally</div>
+                <div class="tagline">Keep More of Your Wealth, Pay Less in Taxes--Legally</div>
             </div>
             
             <div class="reality-check">
@@ -519,376 +1162,116 @@
                 </label>
             </div>
             
-            <button class="button primary" onclick="scrollToAssessment()" style="width: 100%; font-size: 20px; padding: 20px;">
+            <button class="button primary" onclick="startAssessment()" style="width: 100%; font-size: 20px; padding: 20px;">
                 🎯 START MY CPA ASSESSMENT →
             </button>
+        </div>
+
+        <!-- PAGE 2: DYNAMIC ASSESSMENT -->
+        <div class="page" id="assessment" style="display: none;">
+            <div class="section-header">✅ The 15-Question CPA Strategic Value Assessment</div>
             
-            <div style="text-align: center; margin-top: 30px; font-size: 14px; color: #7f8c8d;">
-                <p><em>"At Preserve Wealth Group, we believe that people who create real value should be able to keep and grow their wealth — not be punished for success." - Joey Lalonde, Founder</em></p>
+            <!-- Progress Bar -->
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar" style="width: 0%;"></div>
+            </div>
+            <div class="progress-text" id="progressText">Question 1 of 15</div>
+
+            <!-- Dynamic Question Container -->
+            <div class="question-container" id="questionContainer">
+                <!-- Questions will be inserted here dynamically -->
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div class="nav-buttons">
+                <button class="button" id="prevBtn" onclick="previousQuestion()" disabled>⬅️ Previous</button>
+                <button class="button" id="resultsBtn" onclick="showResults()" style="display: none;">📊 SEE MY RESULTS</button>
             </div>
         </div>
 
-        <!-- PAGE 2: ASSESSMENT -->
-        <div class="page" id="assessment">
-            <div class="section-header">✅ The 15-Question CPA Strategic Value Assessment</div>
-            <p style="text-align: center; font-size: 16px; margin-bottom: 30px;"><strong>Instructions:</strong> Select the option that best describes your current CPA relationship.</p>
-            
-            <form id="cpaAssessment">
-                <!-- SECTION 1: TAX STRATEGY -->
-                <h3 class="section-title">SECTION 1: TAX STRATEGY (Questions 1-5)</h3>
-                
-                <div class="question">
-                    <div class="question-text">1. Does your CPA schedule annual tax planning meetings (separate from tax prep)?</div>
-                    <div class="options">
-                        <label class="option">
-                            <input type="radio" name="q1" value="5" onchange="calculateScore()">
-                            Yes, 2+ strategic planning meetings per year <span class="points">(5 pts)</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q1" value="3" onchange="calculateScore()">
-                            Yes, 1 annual planning meeting <span class="points">(3 pts)</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q1" value="1" onchange="calculateScore()">
-                            Only discusses planning during tax prep <span class="points">(1 pt)</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q1" value="0" onchange="calculateScore()">
-                            No, we only meet for tax filing <span class="points">(0 pts)</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="question">
-                    <div class="question-text">2. Has your CPA recommended optimizing your business structure as you've grown?</div>
-                    <div class="options">
-                        <label class="option">
-                            <input type="radio" name="q2" value="5" onchange="calculateScore()">
-                            Yes, regularly evaluates structure optimization <span class="points">(5 pts)</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q2" value="3" onchange="calculateScore()">
-                            Yes, has recommended changes before <span class="points">(3 pts)</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q2" value="1" onchange="calculateScore()">
-                            We've discussed it briefly <span class="points">(1 pt)</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q2" value="0" onchange="calculateScore()">
-                            Never discussed structure optimization <span class="points">(0 pts)</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="question">
-                    <div class="question-text">3. Do you have a multi-year tax strategy?</div>
-                    <div class="options">
-                        <label class="option">
-                            <input type="radio" name="q3" value="5" onchange="calculateScore()">
-                            Yes, detailed 3+ year tax plan <span class="points">(5 pts)</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q3" value="3" onchange="calculateScore()">
-                            Yes, we plan 1-2 years ahead <span class="points">(3 pts)</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q3" value="1" onchange="calculateScore()">
-                            Only plan year-to-year <span class="points">(1 pt)</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q3" value="0" onchange="calculateScore()">
-                            No multi-year planning <span class="points">(0 pts)</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="question">
-                    <div class="question-text">4. Can your CPA explain advanced strategies like captive insurance or defined benefit plans?</div>
-                    <div class="options">
-                        <label class="option">
-                            <input type="radio" name="q4" value="5" onchange="calculateScore()">
-                            Yes, explains multiple advanced strategies <span class="points">(5 pts)</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q4" value="3" onchange="calculateScore()">
-                            Familiar with some advanced strategies <span class="points">(3 pts)</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q4" value="1" onchange="calculateScore()">
-                            Limited knowledge of advanced strategies <span class="points">(1 pt)</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q4" value="0" onchange="calculateScore()">
-                            Not familiar with advanced strategies <span class="points">(0 pts)</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="question">
-                    <div class="question-text">5. Does your CPA contact you proactively with tax-saving opportunities?</div>
-                    <div class="options">
-                        <label class="option">
-                            <input type="radio" name="q5" value="5" onchange="calculateScore()">
-                            Yes, regularly contacts me with opportunities <span class="points">(5 pts)</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q5" value="3" onchange="calculateScore()">
-                            Occasionally contacts me <span class="points">(3 pts)</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q5" value="1" onchange="calculateScore()">
-                            Rarely contacts me proactively <span class="points">(1 pt)</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q5" value="0" onchange="calculateScore()">
-                            Never contacts me proactively <span class="points">(0 pts)</span>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- SECTION 2: WEALTH BUILDING -->
-                <h3 class="section-title">SECTION 2: WEALTH BUILDING (Questions 6-10)</h3>
-
-                <div class="question">
-                    <div class="question-text">6. Does your CPA help optimize retirement beyond basic 401(k)?</div>
-                    <div class="options">
-                        <label class="option">
-                            <input type="radio" name="q6" value="5" onchange="calculateScore()">
-                            Yes, actively optimizes advanced retirement strategies <span class="points">(5 pts)</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q6" value="3" onchange="calculateScore()">
-                            Has recommended advanced retirement planning <span class="points">(3 pts)</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q6" value="1" onchange="calculateScore()">
-                            Basic retirement planning only <span class="points">(1 pt)</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q6" value="0" onchange="calculateScore()">
-                            No retirement planning assistance <span class="points">(0 pts)</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="question">
-                    <div class="question-text">7. Does your CPA help structure real estate investments for tax benefits?</div>
-                    <div class="options">
-                        <label class="option">
-                            <input type="radio" name="q7" value="5" onchange="calculateScore()">
-                            Yes, comprehensive real estate tax planning <span class="points">(5 pts)</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q7" value="3" onchange="calculateScore()">
-                            Basic real estate tax guidance <span class="points">(3 pts)</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q7" value="1" onchange="calculateScore()">
-                            Limited real estate knowledge <span class="points">(1 pt)</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q7" value="0" onchange="calculateScore()">
-                            No real estate tax planning <span class="points">(0 pts)</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="question">
-                    <div class="question-text">8. Does your CPA coordinate business and personal tax strategies?</div>
-                    <div class="options">
-                        <label class="option">
-                            <input type="radio" name="q8" value="5" onchange="calculateScore()">
-                            Yes, fully coordinates business/personal strategies <span class="points">(5 pts)</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q8" value="3" onchange="calculateScore()">
-                            Provides some coordination <span class="points">(3 pts)</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q8" value="1" onchange="calculateScore()">
-                            Limited coordination <span class="points">(1 pt)</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q8" value="0" onchange="calculateScore()">
-                            No coordination <span class="points">(0 pts)</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="question">
-                    <div class="question-text">9. Does your CPA work with your estate planning attorney?</div>
-                    <div class="options">
-                        <label class="option">
-                            <input type="radio" name="q9" value="5" onchange="calculateScore()">
-                            Yes, actively coordinates with estate team <span class="points">(5 pts)</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q9" value="3" onchange="calculateScore()">
-                            Provides some estate tax guidance <span class="points">(3 pts)</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q9" value="1" onchange="calculateScore()">
-                            Basic estate planning knowledge <span class="points">(1 pt)</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q9" value="0" onchange="calculateScore()">
-                            No estate planning coordination <span class="points">(0 pts)</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="question">
-                    <div class="question-text">10. Does your CPA provide investment tax strategy guidance?</div>
-                    <div class="options">
-                        <label class="option">
-                            <input type="radio" name="q10" value="5" onchange="calculateScore()">
-                            Yes, comprehensive investment tax strategy <span class="points">(5 pts)</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q10" value="3" onchange="calculateScore()">
-                            Basic investment tax guidance <span class="points">(3 pts)</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q10" value="1" onchange="calculateScore()">
-                            Limited investment knowledge <span class="points">(1 pt)</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q10" value="0" onchange="calculateScore()">
-                            No investment tax strategy <span class="points">(0 pts)</span>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- SECTION 3: STRATEGIC ADVISORY -->
-                <h3 class="section-title">SECTION 3: STRATEGIC ADVISORY (Questions 11-15)</h3>
-
-                <div class="question">
-                    <div class="question-text">11. Does your CPA specialize in your industry?</div>
-                    <div class="options">
-                        <label class="option">
-                            <input type="radio" name="q11" value="5" onchange="calculateScore()">
-                            Yes, deep expertise in my industry <span class="points">(5 pts)</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q11" value="3" onchange="calculateScore()">
-                            Has several clients in my industry <span class="points">(3 pts)</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q11" value="1" onchange="calculateScore()">
-                            Some familiarity with my industry <span class="points">(1 pt)</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q11" value="0" onchange="calculateScore()">
-                            No specific industry expertise <span class="points">(0 pts)</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="question">
-                    <div class="question-text">12. Does your CPA help plan for business growth tax implications?</div>
-                    <div class="options">
-                        <label class="option">
-                            <input type="radio" name="q12" value="5" onchange="calculateScore()">
-                            Yes, comprehensive growth planning <span class="points">(5 pts)</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q12" value="3" onchange="calculateScore()">
-                            Basic growth planning <span class="points">(3 pts)</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q12" value="1" onchange="calculateScore()">
-                            Limited growth planning <span class="points">(1 pt)</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q12" value="0" onchange="calculateScore()">
-                            No growth planning <span class="points">(0 pts)</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="question">
-                    <div class="question-text">13. Have you discussed business exit strategy tax planning?</div>
-                    <div class="options">
-                        <label class="option">
-                            <input type="radio" name="q13" value="5" onchange="calculateScore()">
-                            Yes, detailed exit strategy plan <span class="points">(5 pts)</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q13" value="3" onchange="calculateScore()">
-                            We've discussed exit planning <span class="points">(3 pts)</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q13" value="1" onchange="calculateScore()">
-                            Mentioned briefly <span class="points">(1 pt)</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q13" value="0" onchange="calculateScore()">
-                            No exit strategy discussions <span class="points">(0 pts)</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="question">
-                    <div class="question-text">14. Does your CPA provide quarterly business reviews?</div>
-                    <div class="options">
-                        <label class="option">
-                            <input type="radio" name="q14" value="5" onchange="calculateScore()">
-                            Yes, formal quarterly reviews <span class="points">(5 pts)</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q14" value="3" onchange="calculateScore()">
-                            Periodic business reviews <span class="points">(3 pts)</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q14" value="1" onchange="calculateScore()">
-                            Annual review only <span class="points">(1 pt)</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q14" value="0" onchange="calculateScore()">
-                            No regular reviews <span class="points">(0 pts)</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="question">
-                    <div class="question-text">15. Can your CPA connect you with other financial professionals?</div>
-                    <div class="options">
-                        <label class="option">
-                            <input type="radio" name="q15" value="5" onchange="calculateScore()">
-                            Yes, strong network with regular referrals <span class="points">(5 pts)</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q15" value="3" onchange="calculateScore()">
-                            Occasionally makes referrals <span class="points">(3 pts)</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q15" value="1" onchange="calculateScore()">
-                            Limited professional network <span class="points">(1 pt)</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q15" value="0" onchange="calculateScore()">
-                            No professional network <span class="points">(0 pts)</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="score-box">
-                    Section 1 Score: <span id="section1Score">0</span>/25 &nbsp;&nbsp;|&nbsp;&nbsp;
-                    Section 2 Score: <span id="section2Score">0</span>/25 &nbsp;&nbsp;|&nbsp;&nbsp;
-                    Section 3 Score: <span id="section3Score">0</span>/25
-                </div>
-
-                <div class="total-score">
-                    🎯 YOUR TOTAL SCORE: <span id="totalScore">0</span>/75
-                    <br><button type="button" class="button" onclick="showResults()" style="margin-top: 20px; background: white; color: #e74c3c;">📊 GET MY RESULTS</button>
-                </div>
-            </form>
-        </div>
-
         <!-- PAGE 3: RESULTS -->
-        <div class="page">
-            <div class="section-header">📊 WHAT YOUR SCORE MEANS</div>
+        <div class="page" id="resultsPage" style="display: none;">
+            <div class="section-header">📊 YOUR CPA ASSESSMENT RESULTS</div>
+            
+            <!-- Score Dashboard (only shown on results page) -->
+            <div class="score-dashboard" id="finalScoreDashboard">
+                <h3 style="margin-top: 0;">🎯 Your Final Score Breakdown</h3>
+                <div class="score-grid">
+                    <div class="score-item">
+                        <div class="score-label">Tax Strategy</div>
+                        <span class="score-value" id="finalSection1">0/25</span>
+                    </div>
+                    <div class="score-item">
+                        <div class="score-label">Wealth Building</div>
+                        <span class="score-value" id="finalSection2">0/25</span>
+                    </div>
+                    <div class="score-item">
+                        <div class="score-label">Strategic Advisory</div>
+                        <span class="score-value" id="finalSection3">0/25</span>
+                    </div>
+                </div>
+                <div class="total-score">
+                    🏆 TOTAL SCORE: <span id="finalTotal">0/75</span>
+                </div>
+
+                <!-- Nueva sección debajo del total score -->
+                <div class="warning-box">
+                    <h3>⏰ The Compound Cost of Waiting:</h3>
+                    <div style="display: flex; justify-content: space-between; margin: 20px 0; gap: 20px;">
+                        <div style="text-align: center; flex: 1;">
+                            <h4>10-Year Cost</h4>
+                            <p class="cost-display">$675K - $2.1M</p>
+                        </div>
+                        <div style="text-align: center; flex: 1;">
+                            <h4>20-Year Cost</h4>
+                            <p class="cost-display">$2M - $6.2M</p>
+                        </div>
+                    </div>
+                    <p style="text-align: center; font-weight: bold;"><strong>Reality Check:</strong> What are you paying your CPA annually vs. what you could be saving?</p>
+                </div>
+
+                <div class="success-box">
+                    <h3>✅ Quick Wins: Strategies You Can Implement This Month</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 20px;">
+                        <div>
+                            <h4>1. S-Corporation Review</h4>
+                            <p><strong>If you're an LLC earning $75K+:</strong></p>
+                            <ul class="checklist">
+                                <li><input type="checkbox"> Request S-Corp analysis immediately</li>
+                                <li><input type="checkbox"> Calculate optimal salary level</li>
+                                <li><input type="checkbox"> <strong>Potential savings: $5K-$15K annually</strong></li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4>2. Retirement Optimization</h4>
+                            <p><strong>Beyond basic 401(k):</strong></p>
+                            <ul class="checklist">
+                                <li><input type="checkbox"> Evaluate Solo 401(k) options</li>
+                                <li><input type="checkbox"> Consider defined benefit plans</li>
+                                <li><input type="checkbox"> <strong>Potential savings: $10K-$30K annually</strong></li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4>3. Equipment Strategy</h4>
+                            <p><strong>Section 179 deduction optimization:</strong></p>
+                            <ul class="checklist">
+                                <li><input type="checkbox"> Time equipment purchases strategically</li>
+                                <li><input type="checkbox"> Up to $1.16M immediate deduction available</li>
+                                <li><input type="checkbox"> <strong>Potential savings: $3K-$12K annually</strong></li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4>4. Home Office Audit</h4>
+                            <p><strong>Maximize legitimate deductions:</strong></p>
+                            <ul class="checklist">
+                                <li><input type="checkbox"> Measure and document office space</li>
+                                <li><input type="checkbox"> Calculate proper percentage</li>
+                                <li><input type="checkbox"> <strong>Potential savings: $2K-$8K annually</strong></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
             
             <div id="results-container">
                 <div id="green-results" class="results green">
@@ -943,7 +1326,7 @@
                     <div class="action-item">
                         <h4 style="color: #1f4060;">🎯 CRITICAL NEXT STEPS:</h4>
                         <ul class="checklist">
-                            <li><input type="checkbox"> Complete "Quick Wins" assessment (see Page 4)</li>
+                            <li><input type="checkbox"> Complete "Quick Wins" assessment (continue to next section)</li>
                             <li><input type="checkbox"> Interview 2-3 strategic tax advisors within 30 days</li>
                             <li><input type="checkbox"> Request strategic planning proposal from current CPA</li>
                             <li><input type="checkbox"> Calculate your actual tax overpayment using our calculator</li>
@@ -969,7 +1352,7 @@
                         <ul class="checklist">
                             <li><input type="checkbox"> Schedule consultations with 3 strategic tax advisors within 15 days</li>
                             <li><input type="checkbox"> Implement "Emergency Optimization" strategies immediately</li>
-                            <li><input type="checkbox"> Calculate your exact overpayment using our calculator (Page 5)</li>
+                            <li><input type="checkbox"> Calculate your exact overpayment using our calculator (next section)</li>
                             <li><input type="checkbox"> Plan transition by next tax season (cannot wait)</li>
                             <li><input type="checkbox"> Consider mid-year strategy implementation if possible</li>
                         </ul>
@@ -985,14 +1368,24 @@
             <div class="cta-section">
                 <h3>Ready to Stop Overpaying and Start Building Wealth?</h3>
                 <p style="font-size: 16px; margin: 15px 0;">If this assessment revealed significant gaps, don't let another tax season pass without addressing them. The compound cost of inaction is simply too high.</p>
-                <a href="https://go.preservewealthgroup.com/schedule-15-page-manifesto" class="button" style="background: white; color: #1f4060; font-size: 18px; padding: 15px 30px; text-decoration: none;">
-                    📅 Schedule My Free Consultation
-                </a>
+                
+                <!-- Botones CTA mejorados con mejor separación -->
+                <div class="cta-buttons">
+                    <button class="email-button" onclick="emailResults()">
+                        📧 EMAIL MY RESULTS
+                    </button>
+                    
+                    <div class="button-separator"></div>
+                    
+                    <a href="https://go.preservewealthgroup.com/schedule-15-page-manifesto" class="consultation-glow">
+                        📅 SCHEDULE MY FREE CONSULTATION
+                    </a>
+                </div>
             </div>
         </div>
 
         <!-- PAGE 4: COST ANALYSIS -->
-        <div class="page">
+        <div class="page" id="costAnalysisPage" style="display: none;">
             <div class="section-header">💰 THE TRUE COST OF COMPLIANCE-ONLY SERVICES</div>
             <h3 style="text-align: center; color: #1f4060; margin-bottom: 30px;">For 6-7-8 Figure Business Owners</h3>
             
@@ -1043,6 +1436,7 @@
                 </tbody>
             </table>
 
+            <!-- AQUÍ ESTÁ EL CONTENIDO FALTANTE -->
             <div class="warning-box">
                 <h3 style="color: #c0392b; margin-top: 0;">⏰ The Compound Cost of Waiting:</h3>
                 <div style="display: flex; justify-content: space-between; margin: 20px 0;">
@@ -1102,7 +1496,7 @@
         </div>
 
         <!-- PAGE 5: SAVINGS CALCULATOR -->
-        <div class="page">
+        <div class="page" id="savingsCalculatorPage" style="display: none;">
             <div class="section-header">🧮 YOUR PERSONAL TAX SAVINGS CALCULATOR</div>
             
             <div class="calculator">
@@ -1110,22 +1504,22 @@
                 
                 <div class="calc-row">
                     <label><strong>Annual Business Revenue:</strong></label>
-                    <input type="number" id="revenue" class="calc-input" placeholder="500,000" onchange="calculateSavings()">
+                    <input type="number" id="revenue" class="calc-input" placeholder="500,000" oninput="calculateSavings()">
                 </div>
                 
                 <div class="calc-row">
                     <label><strong>Current Annual Tax Bill:</strong></label>
-                    <input type="number" id="taxes" class="calc-input" placeholder="150,000" onchange="calculateSavings()">
+                    <input type="number" id="taxes" class="calc-input" placeholder="150,000" oninput="calculateSavings()">
                 </div>
                 
                 <div class="calc-row">
                     <label><strong>Current CPA Annual Fee:</strong></label>
-                    <input type="number" id="cpafee" class="calc-input" placeholder="5,000" onchange="calculateSavings()">
+                    <input type="number" id="cpafee" class="calc-input" placeholder="5,000" oninput="calculateSavings()">
                 </div>
 
                 <div class="calc-row">
                     <label><strong>Your Assessment Score:</strong></label>
-                    <input type="number" id="score" class="calc-input" placeholder="35" min="0" max="75" onchange="calculateSavings()">
+                    <input type="number" id="score" class="calc-input" min="0" max="75" readonly style="background: #f0f0f0;">
                 </div>
             </div>
 
@@ -1133,17 +1527,17 @@
                 <h3 style="color: #27ae60; text-align: center; margin: 30px 0 20px;">💰 Your Potential Annual Tax Savings:</h3>
                 
                 <div class="calc-row" style="background: linear-gradient(135deg, #d5f4e6, #a8e6cf); border: 2px solid #27ae60;">
-                    <label><strong>Conservative Savings (20%):</strong></label>
+                    <label><strong>Conservative Savings:</strong></label>
                     <span id="conservative" class="calc-result">$0</span>
                 </div>
                 
                 <div class="calc-row" style="background: linear-gradient(135deg, #d5f4e6, #a8e6cf); border: 2px solid #27ae60;">
-                    <label><strong>Realistic Savings (30%):</strong></label>
+                    <label><strong>Realistic Savings:</strong></label>
                     <span id="realistic" class="calc-result">$0</span>
                 </div>
                 
                 <div class="calc-row" style="background: linear-gradient(135deg, #d5f4e6, #a8e6cf); border: 2px solid #27ae60;">
-                    <label><strong>Optimized Savings (40%):</strong></label>
+                    <label><strong>Optimized Savings:</strong></label>
                     <span id="aggressive" class="calc-result">$0</span>
                 </div>
 
@@ -1158,31 +1552,27 @@
                     <label><strong>20-Year Compound Value (7% return):</strong></label>
                     <span id="twentyyear" class="calc-result" style="color: #c0392b;">$0</span>
                 </div>
-
-                <div style="background: linear-gradient(135deg, #1f4060, #0f2030); color: white; padding: 20px; border-radius: 10px; margin: 30px 0; text-align: center;">
-                    <h4 style="margin-top: 0;">💡 Your Optimization Opportunity</h4>
-                    <p id="opportunity-text" style="font-size: 16px; margin: 15px 0;"></p>
-                    <p style="font-size: 14px; margin: 0;"><em>These calculations are based on your assessment score and typical optimization results for similar business owners.</em></p>
-                </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 30px;">
-                <button class="button" onclick="emailResults()" style="background: linear-gradient(135deg, #1f4060, #0f2030);">
-                    📧 EMAIL MY RESULTS
+            <!-- Botones de calculadora mejorados -->
+            <div class="calculator-buttons">
+                <button class="calc-button email" onclick="emailCalculatorResults()">
+                    📧 EMAIL CALCULATOR RESULTS
                 </button>
                 
-                <a href="https://go.preservewealthgroup.com/schedule-15-page-manifesto" class="button" style="background: linear-gradient(135deg, #27ae60, #229954); text-decoration: none;">
+                <a href="https://go.preservewealthgroup.com/schedule-15-page-manifesto" class="calc-button consultation" style="text-decoration: none;">
                     📅 GET MY FREE CONSULTATION
                 </a>
             </div>
 
-            <div style="text-align: center; margin-top: 20px; padding: 15px; background: #f2f4f8; border-radius: 8px;">
-                <p style="font-size: 14px; color: #7f8c8d; margin: 0;"><strong>Ready for Expert Help?</strong> Our senior financial consultants will review your specific situation and show you exactly how the Tax Freedom Framework™ applies to your business.</p>
+            <!-- Nueva sección de expert help -->
+            <div class="expert-help-section">
+                <p><strong>Ready for Expert Help?</strong> Our senior financial consultants will review your specific situation and show you exactly how the Tax Freedom Framework™ applies to your business.</p>
             </div>
         </div>
 
         <!-- PAGE 6: MEETING SCRIPTS & NEXT STEPS -->
-        <div class="page">
+        <div class="page" id="meetingScriptsPage" style="display: none;">
             <div class="section-header">🗣️ CPA MEETING SCRIPT & NEXT STEPS</div>
             
             <div style="background: #f2f4f8; padding: 25px; border-radius: 10px; border: 2px solid #1f4060; margin-bottom: 30px;">
@@ -1195,7 +1585,7 @@
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
                 <div>
                     <h4 style="color: #1f4060; border-bottom: 2px solid #1f4060; padding-bottom: 5px;">🎯 KEY QUESTIONS TO ASK:</h4>
-                    <div class="checklist">
+                    <ul class="checklist">
                         <li><input type="checkbox"> <strong>"What's my effective tax rate compared to other business owners at my income level?"</strong></li>
                         <li><input type="checkbox"> <strong>"What are the three biggest tax optimization opportunities you see for my business?"</strong></li>
                         <li><input type="checkbox"> <strong>"Should I consider S-Corp election, and what would my optimal salary be?"</strong></li>
@@ -1203,28 +1593,28 @@
                         <li><input type="checkbox"> <strong>"How do you coordinate tax planning with estate planning and investments?"</strong></li>
                         <li><input type="checkbox"> <strong>"What's your process for proactive tax planning throughout the year?"</strong></li>
                         <li><input type="checkbox"> <strong>"Can you explain strategies like captive insurance or defined benefit plans for my situation?"</strong></li>
-                    </div>
+                    </ul>
                 </div>
 
                 <div>
                     <h4 style="color: #e74c3c; border-bottom: 2px solid #e74c3c; padding-bottom: 5px;">🚩 RED FLAGS TO WATCH FOR:</h4>
-                    <div class="checklist">
+                    <ul class="checklist">
                         <li><input type="checkbox"> <em>"That's too complex for your level"</em></li>
                         <li><input type="checkbox"> <em>"We focus on keeping things simple"</em></li>
                         <li><input type="checkbox"> <em>"Those strategies are risky"</em> (without specific explanation)</li>
                         <li><input type="checkbox"> Inability to explain strategies in detail</li>
                         <li><input type="checkbox"> No proactive suggestions or ideas</li>
                         <li><input type="checkbox"> Dismissive of optimization opportunities</li>
-                    </div>
+                    </ul>
 
                     <h4 style="color: #27ae60; border-bottom: 2px solid #27ae60; padding-bottom: 5px; margin-top: 20px;">✅ GREEN FLAGS TO LOOK FOR:</h4>
-                    <div class="checklist">
+                    <ul class="checklist">
                         <li><input type="checkbox"> Specific knowledge of advanced strategies</li>
                         <li><input type="checkbox"> Proactive suggestions for your situation</li>
                         <li><input type="checkbox"> References to successful client implementations</li>
                         <li><input type="checkbox"> Willingness to coordinate with other professionals</li>
                         <li><input type="checkbox"> Enthusiasm for tax optimization opportunities</li>
-                    </div>
+                    </ul>
                 </div>
             </div>
 
@@ -1269,7 +1659,7 @@
             <div class="cta-section">
                 <h3>Skip the Trial and Error - Get Expert Guidance</h3>
                 <p>Why navigate this alone when you can get a personalized analysis from tax optimization experts?</p>
-                <a href="https://go.preservewealthgroup.com/schedule-15-page-manifesto" class="button" style="background: white; color: #1f4060; font-size: 18px; padding: 15px 30px; text-decoration: none;">
+                <a href="https://go.preservewealthgroup.com/schedule-15-page-manifesto" class="consultation-glow">
                     📞 Schedule My Complimentary Consultation
                 </a>
                 <p style="font-size: 14px; margin-top: 10px; opacity: 0.9;">No obligation • No fees • No pressure • Just honest answers about what's possible</p>
@@ -1277,7 +1667,7 @@
         </div>
 
         <!-- PAGE 7: CONCLUSION -->
-        <div class="page">
+        <div class="page dynamic-conclusion floating-elements" id="conclusionPage" style="display: none;">
             <div class="header">
                 <div class="logo">
                     <!-- Logo placeholder - replace with your actual logo -->
@@ -1289,7 +1679,7 @@
                         <span style="font-size: 16px;">®</span>
                     </div>
                 </div>
-                <div class="tagline">Keep More of Your Wealth, Pay Less in Taxes—Legally</div>
+                <div class="tagline">Keep More of Your Wealth, Pay Less in Taxes--Legally</div>
             </div>
 
             <div style="text-align: center; margin: 40px 0;">
@@ -1297,7 +1687,7 @@
                 <p style="font-size: 18px; color: #34495e; max-width: 600px; margin: 0 auto 30px;">This assessment has shown you exactly where you stand and what's possible. The question now is: what will you do with this information?</p>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 30px; margin: 40px 0;">
+            <div class="dynamic-grid" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 30px; margin: 40px 0;">
                 <div class="success-box" style="text-align: center;">
                     <h3 style="color: #27ae60; margin-top: 0;">💡 Remember</h3>
                     <p>Every month you delay costs you real money in tax savings and compound growth opportunities.</p>
@@ -1312,10 +1702,10 @@
                 </div>
             </div>
 
-            <div style="background: linear-gradient(135deg, #1f4060, #0f2030); color: white; padding: 40px; border-radius: 15px; text-align: center; margin: 30px 0;">
+            <div class="final-cta" style="background: linear-gradient(135deg, #1f4060, #0f2030); color: white; padding: 40px; border-radius: 15px; text-align: center; margin: 30px 0;">
                 <h3 style="font-size: 28px; margin-bottom: 20px;">🎯 Take Action Today</h3>
                 <p style="font-size: 18px; margin-bottom: 25px;">Don't let another tax season pass without optimizing your strategy. Your future self will thank you for taking action today.</p>
-                <a href="https://go.preservewealthgroup.com/schedule-15-page-manifesto" class="button" style="background: white; color: #1f4060; font-size: 20px; padding: 20px 40px; text-decoration: none; margin: 10px;">
+                <a href="https://go.preservewealthgroup.com/schedule-15-page-manifesto" class="consultation-glow" style="margin: 10px;">
                     🚀 Schedule My Free Strategy Session
                 </a>
                 <p style="font-size: 14px; margin-top: 15px; opacity: 0.8;">No pitch, no pressure - just expert analysis of your situation and clear next steps.</p>
@@ -1324,7 +1714,7 @@
             <div style="text-align: center; margin-top: 40px; padding: 20px; border-top: 2px solid #1f4060;">
                 <p style="font-size: 14px; color: #7f8c8d; margin: 0;">
                     <strong>Preserve Wealth Group®</strong><br>
-                    Keep More of Your Wealth, Pay Less in Taxes—Legally<br>
+                    Keep More of Your Wealth, Pay Less in Taxes--Legally<br>
                     <em>This assessment is for educational purposes only and does not constitute tax, legal, or financial advice. Results may vary based on individual circumstances.</em>
                 </p>
             </div>
@@ -1333,93 +1723,485 @@
     <!-- END PROTECTED CONTENT WRAPPER -->
 
     <script>
-        // Password protection function
+        // Assessment Questions Data
+        const questions = [
+            // Section 1: Tax Strategy (1-5)
+            {
+                section: 1,
+                sectionName: "TAX STRATEGY",
+                number: 1,
+                text: "Does your CPA schedule annual tax planning meetings (separate from tax prep)?",
+                options: [
+                    { text: "Yes, 2+ strategic planning meetings per year", points: 5 },
+                    { text: "Yes, 1 annual planning meeting", points: 3 },
+                    { text: "Only discusses planning during tax prep", points: 1 },
+                    { text: "No, we only meet for tax filing", points: 0 }
+                ]
+            },
+            {
+                section: 1,
+                sectionName: "TAX STRATEGY",
+                number: 2,
+                text: "Has your CPA recommended optimizing your business structure as you've grown?",
+                options: [
+                    { text: "Yes, regularly evaluates structure optimization", points: 5 },
+                    { text: "Yes, has recommended changes before", points: 3 },
+                    { text: "We've discussed it briefly", points: 1 },
+                    { text: "Never discussed structure optimization", points: 0 }
+                ]
+            },
+            {
+                section: 1,
+                sectionName: "TAX STRATEGY",
+                number: 3,
+                text: "Do you have a multi-year tax strategy?",
+                options: [
+                    { text: "Yes, detailed 3+ year tax plan", points: 5 },
+                    { text: "Yes, we plan 1-2 years ahead", points: 3 },
+                    { text: "Only plan year-to-year", points: 1 },
+                    { text: "No multi-year planning", points: 0 }
+                ]
+            },
+            {
+                section: 1,
+                sectionName: "TAX STRATEGY",
+                number: 4,
+                text: "Can your CPA explain advanced strategies like captive insurance or defined benefit plans?",
+                options: [
+                    { text: "Yes, explains multiple advanced strategies", points: 5 },
+                    { text: "Familiar with some advanced strategies", points: 3 },
+                    { text: "Limited knowledge of advanced strategies", points: 1 },
+                    { text: "Not familiar with advanced strategies", points: 0 }
+                ]
+            },
+            {
+                section: 1,
+                sectionName: "TAX STRATEGY",
+                number: 5,
+                text: "Does your CPA contact you proactively with tax-saving opportunities?",
+                options: [
+                    { text: "Yes, regularly contacts me with opportunities", points: 5 },
+                    { text: "Occasionally contacts me", points: 3 },
+                    { text: "Rarely contacts me proactively", points: 1 },
+                    { text: "Never contacts me proactively", points: 0 }
+                ]
+            },
+            // Section 2: Wealth Building (6-10)
+            {
+                section: 2,
+                sectionName: "WEALTH BUILDING",
+                number: 6,
+                text: "Does your CPA help optimize retirement beyond basic 401(k)?",
+                options: [
+                    { text: "Yes, actively optimizes advanced retirement strategies", points: 5 },
+                    { text: "Has recommended advanced retirement planning", points: 3 },
+                    { text: "Basic retirement planning only", points: 1 },
+                    { text: "No retirement planning assistance", points: 0 }
+                ]
+            },
+            {
+                section: 2,
+                sectionName: "WEALTH BUILDING",
+                number: 7,
+                text: "Does your CPA help structure real estate investments for tax benefits?",
+                options: [
+                    { text: "Yes, comprehensive real estate tax planning", points: 5 },
+                    { text: "Basic real estate tax guidance", points: 3 },
+                    { text: "Limited real estate knowledge", points: 1 },
+                    { text: "No real estate tax planning", points: 0 }
+                ]
+            },
+            {
+                section: 2,
+                sectionName: "WEALTH BUILDING",
+                number: 8,
+                text: "Does your CPA coordinate business and personal tax strategies?",
+                options: [
+                    { text: "Yes, fully coordinates business/personal strategies", points: 5 },
+                    { text: "Provides some coordination", points: 3 },
+                    { text: "Limited coordination", points: 1 },
+                    { text: "No coordination", points: 0 }
+                ]
+            },
+            {
+                section: 2,
+                sectionName: "WEALTH BUILDING",
+                number: 9,
+                text: "Does your CPA work with your estate planning attorney?",
+                options: [
+                    { text: "Yes, actively coordinates with estate team", points: 5 },
+                    { text: "Provides some estate tax guidance", points: 3 },
+                    { text: "Basic estate planning knowledge", points: 1 },
+                    { text: "No estate planning coordination", points: 0 }
+                ]
+            },
+            {
+                section: 2,
+                sectionName: "WEALTH BUILDING",
+                number: 10,
+                text: "Does your CPA provide investment tax strategy guidance?",
+                options: [
+                    { text: "Yes, comprehensive investment tax strategy", points: 5 },
+                    { text: "Basic investment tax guidance", points: 3 },
+                    { text: "Limited investment knowledge", points: 1 },
+                    { text: "No investment tax strategy", points: 0 }
+                ]
+            },
+            // Section 3: Strategic Advisory (11-15)
+            {
+                section: 3,
+                sectionName: "STRATEGIC ADVISORY",
+                number: 11,
+                text: "Does your CPA specialize in your industry?",
+                options: [
+                    { text: "Yes, deep expertise in my industry", points: 5 },
+                    { text: "Has several clients in my industry", points: 3 },
+                    { text: "Some familiarity with my industry", points: 1 },
+                    { text: "No specific industry expertise", points: 0 }
+                ]
+            },
+            {
+                section: 3,
+                sectionName: "STRATEGIC ADVISORY",
+                number: 12,
+                text: "Does your CPA help plan for business growth tax implications?",
+                options: [
+                    { text: "Yes, comprehensive growth planning", points: 5 },
+                    { text: "Basic growth planning", points: 3 },
+                    { text: "Limited growth planning", points: 1 },
+                    { text: "No growth planning", points: 0 }
+                ]
+            },
+            {
+                section: 3,
+                sectionName: "STRATEGIC ADVISORY",
+                number: 13,
+                text: "Have you discussed business exit strategy tax planning?",
+                options: [
+                    { text: "Yes, detailed exit strategy plan", points: 5 },
+                    { text: "We've discussed exit planning", points: 3 },
+                    { text: "Mentioned briefly", points: 1 },
+                    { text: "No exit strategy discussions", points: 0 }
+                ]
+            },
+            {
+                section: 3,
+                sectionName: "STRATEGIC ADVISORY",
+                number: 14,
+                text: "Does your CPA provide quarterly business reviews?",
+                options: [
+                    { text: "Yes, formal quarterly reviews", points: 5 },
+                    { text: "Periodic business reviews", points: 3 },
+                    { text: "Annual review only", points: 1 },
+                    { text: "No regular reviews", points: 0 }
+                ]
+            },
+            {
+                section: 3,
+                sectionName: "STRATEGIC ADVISORY",
+                number: 15,
+                text: "Can your CPA connect you with other financial professionals?",
+                options: [
+                    { text: "Yes, strong network with regular referrals", points: 5 },
+                    { text: "Occasionally makes referrals", points: 3 },
+                    { text: "Limited professional network", points: 1 },
+                    { text: "No professional network", points: 0 }
+                ]
+            }
+        ];
+
+        // Assessment State
+        let currentQuestion = 0;
+        let answers = {};
+        let sectionScores = { 1: 0, 2: 0, 3: 0 };
+        let totalScore = 0;
+
+        // Password protection variables
+        let attempts = 0;
+        const maxAttempts = 5;
+        const correctPasswords = ['CPA2025', 'cpa2025', 'Cpa2025']; // Multiple valid formats
+
+        // Enhanced password validation function
         function checkPassword() {
-            const password = document.getElementById('passwordInput').value;
-            const correctPassword = 'CPA2025'; // Change this to your preferred password
+            const passwordInput = document.getElementById('passwordInput');
+            const errorMessage = document.getElementById('errorMessage');
+            const attemptsCounter = document.getElementById('attemptsCounter');
+            const remainingAttempts = document.getElementById('remainingAttempts');
+            const unlockButton = document.getElementById('unlockButton');
             
-            if (password === correctPassword) {
+            // Get and sanitize password input
+            const enteredPassword = passwordInput.value.trim();
+            
+            // Check if password is correct (case-insensitive and trimmed)
+            const isPasswordCorrect = correctPasswords.some(pwd => 
+                pwd.toLowerCase() === enteredPassword.toLowerCase()
+            );
+            
+            if (isPasswordCorrect) {
+                // Success! Unlock the content
                 document.getElementById('passwordGate').style.display = 'none';
                 document.getElementById('toolkitContent').classList.add('unlocked');
                 
-                // Track access (optional)
-                console.log('Toolkit accessed at:', new Date());
+                // Show success notification
+                showNotification('✅ Access granted! Welcome to your CPA Evaluation Toolkit.', 'success');
+                
             } else {
-                alert('Incorrect password. Please check your email for the correct password.');
-                document.getElementById('passwordInput').value = '';
+                // Incorrect password
+                attempts++;
+                const remaining = maxAttempts - attempts;
+                
+                // Show error styling
+                passwordInput.classList.add('error');
+                errorMessage.style.display = 'block';
+                
+                // Update attempts counter
+                remainingAttempts.textContent = remaining;
+                attemptsCounter.style.display = 'block';
+                
+                // Clear the password field
+                passwordInput.value = '';
+                
+                // Remove error styling after animation
+                setTimeout(() => {
+                    passwordInput.classList.remove('error');
+                }, 500);
+                
+                // Auto-hide error message
+                setTimeout(() => {
+                    errorMessage.style.display = 'none';
+                }, 3000);
+                
+                // Disable button if max attempts reached
+                if (attempts >= maxAttempts) {
+                    unlockButton.disabled = true;
+                    unlockButton.textContent = '🔒 TOO MANY ATTEMPTS';
+                    errorMessage.textContent = 'Too many failed attempts. Please contact support.';
+                    passwordInput.disabled = true;
+                }
+                
+                // Focus back to input
+                passwordInput.focus();
             }
         }
 
-        // Allow Enter key to submit password
+        // Add Enter key support for password input
         document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('passwordInput').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
+            const passwordInput = document.getElementById('passwordInput');
+            
+            // Focus on password input when page loads
+            passwordInput.focus();
+            
+            // Add Enter key listener
+            passwordInput.addEventListener('keypress', function(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
                     checkPassword();
                 }
             });
+            
+            // Clear error styling when user starts typing
+            passwordInput.addEventListener('input', function() {
+                this.classList.remove('error');
+                document.getElementById('errorMessage').style.display = 'none';
+            });
         });
 
-        // Global variables to store scores
-        let sectionScores = { section1: 0, section2: 0, section3: 0 };
-        let totalScore = 0;
+        // Notification function
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+            
+            if (type === 'error') {
+                notification.style.background = '#e74c3c';
+            }
+            
+            document.body.appendChild(notification);
+            
+            // Remove notification after 3 seconds
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
 
-        // Function to scroll to assessment section
-        function scrollToAssessment() {
-            document.getElementById('assessment').scrollIntoView({ 
+        // Start assessment - MODIFICADO para scroll automático
+        function startAssessment() {
+            document.getElementById('assessment').style.display = 'block';
+            showQuestion(0);
+            
+            // Scroll automático hacia la sección de assessment
+            setTimeout(() => {
+                document.getElementById('assessment').scrollIntoView({ 
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }, 100);
+        }
+
+        // Show specific question
+        function showQuestion(index) {
+            currentQuestion = index;
+            const question = questions[index];
+            
+            // Update progress
+            updateProgress();
+            
+            // Create question HTML
+            const questionHTML = `
+                <div class="question" id="question-${index}">
+                    <div class="question-header">
+                        <div class="question-number">${question.number}</div>
+                        <div class="section-info">${question.sectionName}</div>
+                    </div>
+                    <div class="question-text">${question.text}</div>
+                    <div class="options" id="options-${index}">
+                        ${question.options.map((option, optionIndex) => `
+                            <div class="option" onclick="selectOption(${index}, ${optionIndex}, ${option.points})">
+                                <input type="radio" name="q${question.number}" value="${option.points}">
+                                <span>${option.text}</span>
+                                <span class="points">(${option.points} pts)</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('questionContainer').innerHTML = questionHTML;
+            
+            // Update navigation buttons
+            updateNavButtons();
+            
+            // Restore previous answer if exists
+            if (answers[index] !== undefined) {
+                selectOption(index, answers[index].optionIndex, answers[index].points, false);
+            }
+        }
+
+        // Select option - MODIFICADO para auto-avanzar sin botón next
+        function selectOption(questionIndex, optionIndex, points, animate = true) {
+            // Remove previous selection
+            const options = document.querySelectorAll(`#options-${questionIndex} .option`);
+            options.forEach(opt => opt.classList.remove('selected'));
+            
+            // Add selection to clicked option
+            const selectedOption = options[optionIndex];
+            selectedOption.classList.add('selected');
+            selectedOption.querySelector('input').checked = true;
+            
+            // Store answer
+            answers[questionIndex] = { optionIndex, points };
+            
+            // Update scores internally
+            updateScores();
+            
+            // Mark question as answered
+            const questionElement = document.getElementById(`question-${questionIndex}`);
+            questionElement.classList.add('answered');
+            
+            // Auto-advance after 1 second
+            setTimeout(() => {
+                if (currentQuestion < questions.length - 1) {
+                    showQuestion(currentQuestion + 1);
+                } else {
+                    showResultsButton();
+                }
+            }, 1000);
+        }
+
+        // Update scores
+        function updateScores() {
+            // Reset section scores
+            sectionScores = { 1: 0, 2: 0, 3: 0 };
+            
+            // Calculate scores based on answers
+            Object.keys(answers).forEach(questionIndex => {
+                const question = questions[questionIndex];
+                const points = answers[questionIndex].points;
+                sectionScores[question.section] += points;
+            });
+            
+            // Calculate total
+            totalScore = sectionScores[1] + sectionScores[2] + sectionScores[3];
+        }
+
+        // Update progress bar
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            
+            progressBar.style.width = `${progress}%`;
+            progressText.textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
+        }
+
+        // Update navigation buttons - MODIFICADO sin next button
+        function updateNavButtons() {
+            const prevBtn = document.getElementById('prevBtn');
+            const resultsBtn = document.getElementById('resultsBtn');
+            
+            prevBtn.disabled = currentQuestion === 0;
+            
+            if (currentQuestion === questions.length - 1 && answers[currentQuestion] !== undefined) {
+                showResultsButton();
+            } else {
+                resultsBtn.style.display = 'none';
+            }
+        }
+
+        // Show results button
+        function showResultsButton() {
+            document.getElementById('resultsBtn').style.display = 'block';
+        }
+
+        // Navigation functions
+        function previousQuestion() {
+            if (currentQuestion > 0) {
+                showQuestion(currentQuestion - 1);
+            }
+        }
+
+        // Show results
+        function showResults() {
+            document.getElementById('resultsPage').style.display = 'block';
+            
+            // Show final score dashboard
+            const scoreDashboard = document.getElementById('finalScoreDashboard');
+            scoreDashboard.classList.add('show');
+            
+            // Update final scores
+            document.getElementById('finalSection1').textContent = `${sectionScores[1]}/25`;
+            document.getElementById('finalSection2').textContent = `${sectionScores[2]}/25`;
+            document.getElementById('finalSection3').textContent = `${sectionScores[3]}/25`;
+            document.getElementById('finalTotal').textContent = `${totalScore}/75`;
+            
+            // Auto-populate calculator score
+            document.getElementById('score').value = totalScore;
+            
+            // Show result content
+            showResultContent();
+            
+            // Automatically show cost analysis after results
+            setTimeout(() => {
+                showCostAnalysis();
+            }, 3000);
+            
+            // Scroll to results
+            document.getElementById('resultsPage').scrollIntoView({
                 behavior: 'smooth',
                 block: 'start'
             });
         }
 
-        // Function to calculate scores
-        function calculateScore() {
-            // Reset scores
-            sectionScores = { section1: 0, section2: 0, section3: 0 };
-            
-            // Calculate Section 1 (Questions 1-5)
-            for (let i = 1; i <= 5; i++) {
-                const questionValue = getQuestionValue(`q${i}`);
-                sectionScores.section1 += questionValue;
-            }
-            
-            // Calculate Section 2 (Questions 6-10)
-            for (let i = 6; i <= 10; i++) {
-                const questionValue = getQuestionValue(`q${i}`);
-                sectionScores.section2 += questionValue;
-            }
-            
-            // Calculate Section 3 (Questions 11-15)
-            for (let i = 11; i <= 15; i++) {
-                const questionValue = getQuestionValue(`q${i}`);
-                sectionScores.section3 += questionValue;
-            }
-            
-            // Calculate total score
-            totalScore = sectionScores.section1 + sectionScores.section2 + sectionScores.section3;
-            
-            // Update displays
-            updateScoreDisplay();
-        }
-
-        function getQuestionValue(questionName) {
-            const selectedOption = document.querySelector(`input[name="${questionName}"]:checked`);
-            return selectedOption ? parseInt(selectedOption.value) : 0;
-        }
-
-        function updateScoreDisplay() {
-            document.getElementById('section1Score').textContent = sectionScores.section1;
-            document.getElementById('section2Score').textContent = sectionScores.section2;
-            document.getElementById('section3Score').textContent = sectionScores.section3;
-            document.getElementById('totalScore').textContent = totalScore;
-        }
-
-        // Function to show results based on score
-        function showResults() {
+        // Show result content based on score
+        function showResultContent() {
             // Hide all results first
-            const allResults = document.querySelectorAll('.results');
-            allResults.forEach(result => result.style.display = 'none');
+            const allResults = document.querySelectorAll('#results-container .results');
+            allResults.forEach(result => {
+                result.style.display = 'none';
+                result.classList.remove('show');
+            });
             
-            // Show appropriate result based on score
+            // Determine which result to show
             let resultToShow;
             if (totalScore >= 60) {
                 resultToShow = 'green-results';
@@ -1431,102 +2213,81 @@
                 resultToShow = 'red-results';
             }
             
-            document.getElementById(resultToShow).style.display = 'block';
-            
-            // Scroll to results
-            document.getElementById('results-container').scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
-            });
+            // Show the appropriate result with animation
+            const resultElement = document.getElementById(resultToShow);
+            resultElement.style.display = 'block';
+            setTimeout(() => {
+                resultElement.classList.add('show');
+            }, 100);
         }
 
-        // Function to calculate savings
+        // Cost analysis function
+        function showCostAnalysis() {
+            document.getElementById('costAnalysisPage').style.display = 'block';
+            setTimeout(() => {
+                showSavingsCalculator();
+            }, 2000);
+        }
+
+        // Savings calculator function
+        function showSavingsCalculator() {
+            document.getElementById('savingsCalculatorPage').style.display = 'block';
+            setTimeout(() => {
+                showMeetingScripts();
+            }, 2000);
+        }
+
+        // Meeting scripts function
+        function showMeetingScripts() {
+            document.getElementById('meetingScriptsPage').style.display = 'block';
+            setTimeout(() => {
+                showConclusion();
+            }, 2000);
+        }
+
+        // Conclusion function
+        function showConclusion() {
+            document.getElementById('conclusionPage').style.display = 'block';
+        }
+
+        // Calculate savings function
         function calculateSavings() {
             const revenue = parseFloat(document.getElementById('revenue').value) || 0;
             const taxes = parseFloat(document.getElementById('taxes').value) || 0;
             const cpafee = parseFloat(document.getElementById('cpafee').value) || 0;
             const score = parseFloat(document.getElementById('score').value) || 0;
             
-            if (revenue === 0 || taxes === 0) {
-                document.getElementById('savings-results').style.display = 'none';
-                return;
+            if (revenue > 0 && taxes > 0) {
+                // Calculate savings potential based on score
+                const savingsMultiplier = (75 - score) / 75; // Lower score = higher savings potential
+                
+                const conservative = Math.round(taxes * 0.08 * savingsMultiplier);
+                const realistic = Math.round(taxes * 0.15 * savingsMultiplier);
+                const aggressive = Math.round(taxes * 0.25 * savingsMultiplier);
+                
+                // Calculate compound values
+                const tenYear = Math.round(realistic * 13.816); // 7% compound for 10 years
+                const twentyYear = Math.round(realistic * 40.995); // 7% compound for 20 years
+                
+                // Update display
+                document.getElementById('conservative').textContent = `$${conservative.toLocaleString()}`;
+                document.getElementById('realistic').textContent = `$${realistic.toLocaleString()}`;
+                document.getElementById('aggressive').textContent = `$${aggressive.toLocaleString()}`;
+                document.getElementById('tenyear').textContent = `$${tenYear.toLocaleString()}`;
+                document.getElementById('twentyyear').textContent = `$${twentyYear.toLocaleString()}`;
+                
+                document.getElementById('savings-results').style.display = 'block';
             }
-            
-            // Calculate savings multiplier based on score (lower score = higher potential savings)
-            let savingsMultiplier;
-            if (score >= 60) {
-                savingsMultiplier = 0.15; // 15% potential additional savings
-            } else if (score >= 40) {
-                savingsMultiplier = 0.25; // 25% potential savings
-            } else if (score >= 20) {
-                savingsMultiplier = 0.35; // 35% potential savings
-            } else {
-                savingsMultiplier = 0.45; // 45% potential savings
-            }
-            
-            // Calculate different savings scenarios
-            const conservative = Math.round(taxes * savingsMultiplier * 0.6);
-            const realistic = Math.round(taxes * savingsMultiplier);
-            const aggressive = Math.round(taxes * savingsMultiplier * 1.4);
-            
-            // Calculate compound values (7% annual return)
-            const tenYear = Math.round(realistic * ((Math.pow(1.07, 10) - 1) / 0.07));
-            const twentyYear = Math.round(realistic * ((Math.pow(1.07, 20) - 1) / 0.07));
-            
-            // Update display
-            document.getElementById('conservative').textContent = `$${conservative.toLocaleString()}`;
-            document.getElementById('realistic').textContent = `$${realistic.toLocaleString()}`;
-            document.getElementById('aggressive').textContent = `$${aggressive.toLocaleString()}`;
-            document.getElementById('tenyear').textContent = `$${tenYear.toLocaleString()}`;
-            document.getElementById('twentyyear').textContent = `$${twentyYear.toLocaleString()}`;
-            
-            // Update opportunity text
-            let opportunityText;
-            if (score >= 60) {
-                opportunityText = "You're already well-optimized! Focus on advanced strategies and quarterly reviews to maximize your existing good foundation.";
-            } else if (score >= 40) {
-                opportunityText = "Significant optimization opportunities exist. Strategic planning improvements could easily add $" + realistic.toLocaleString() + " annually to your bottom line.";
-            } else if (score >= 20) {
-                opportunityText = "Major tax optimization gaps detected. You're likely missing $" + realistic.toLocaleString() + "+ annually in legitimate tax savings. This requires immediate attention.";
-            } else {
-                opportunityText = "CRITICAL: Your current tax approach is costing you $" + realistic.toLocaleString() + "+ annually. This represents a financial emergency requiring immediate strategic tax planning intervention.";
-            }
-            
-            document.getElementById('opportunity-text').textContent = opportunityText;
-            document.getElementById('savings-results').style.display = 'block';
         }
 
-        // Function to email results (simplified version)
+        // Email results functions (placeholder)
         function emailResults() {
-            const revenue = document.getElementById('revenue').value || 'Not provided';
-            const taxes = document.getElementById('taxes').value || 'Not provided';
-            const cpafee = document.getElementById('cpafee').value || 'Not provided';
-            const score = document.getElementById('score').value || totalScore;
-            
-            const emailBody = `CPA Evaluation Results:
-            
-Assessment Score: ${score}/75
-Section 1 (Tax Strategy): ${sectionScores.section1}/25
-Section 2 (Wealth Building): ${sectionScores.section2}/25  
-Section 3 (Strategic Advisory): ${sectionScores.section3}/25
-
-Business Information:
-Annual Revenue: $${revenue}
-Current Tax Bill: $${taxes}
-Current CPA Fee: $${cpafee}
-
-I would like to discuss my assessment results and explore optimization opportunities.`;
-
-            const subject = 'CPA Evaluation Results - Optimization Consultation Request';
-            const mailtoLink = `mailto:info@preservewealthgroup.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(emailBody)}`;
-            
-            window.location.href = mailtoLink;
+            showNotification('📧 Results will be emailed to you shortly!');
         }
 
-        // Initialize scores on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            updateScoreDisplay();
-        });
+        function emailCalculatorResults() {
+            showNotification('📧 Calculator results will be emailed to you shortly!');
+        }
     </script>
 </body>
 </html>
